@@ -1,27 +1,18 @@
-let date = new Date();
-  
-import {PRODUCTS} from './database.js';
-//console.log(PRODUCTS)
-const MAIN_PARENT = document.getElementById('mainParent');
+import {PRODUCTS} from './database.js'
 
-let btnSearch = document.getElementById('btnSearch')
-let searchParent = document.getElementById('searchParent')
-searchParent.style.display ="none"
-
-
-const CREATE_CARD = (element, parent) =>{
-  
+const CREATE_CARD =(element, parent)=>{
   element.image = "IMAGES/"+element.name.split(" ").join('-')+".jpg"
   
   let CARD_COL = document.createElement('div')
-  CARD_COL.classList.add('col-8', 'col-md-4', 'col-lg-3', 'my-3')
-  parent.appendChild(CARD_COL)
+  CARD_COL.classList.add('col-8', 'col-md-4', 'col-lg-3')
+  parent.append(CARD_COL)
   
   let CARD = document.createElement('div')
   CARD.classList.add('card', 'h-100')
-  CARD_COL.appendChild(CARD)
+  CARD_COL.append(CARD)
   
   let CARD_IMAGE = document.createElement('img')
+  CARD_IMAGE.classList.add('img-fluid')
   CARD_IMAGE.src = element.image
   CARD.append(CARD_IMAGE)
   
@@ -29,7 +20,7 @@ const CREATE_CARD = (element, parent) =>{
   CARD_BODY.classList.add('card-body')
   CARD.append(CARD_BODY)
   
-  let CARD_TITLE = document.createElement('h2')
+  let CARD_TITLE = document.createElement('h4')
   CARD_TITLE.classList.add('card-title')
   CARD_TITLE.textContent = element.name
   CARD_BODY.append(CARD_TITLE)
@@ -40,85 +31,70 @@ const CREATE_CARD = (element, parent) =>{
   CARD_BODY.append(CARD_TEXT)
   
   let CARD_BTN = document.createElement('a')
-  CARD_BTN.classList.add('btn', 'btn-primary')
+  CARD_BTN.classList.add('btn', 'btn-primary', 'my-3')
+  CARD_BTN.textContent = "Buy $"+ element.price
   
-  CARD_BTN.textContent = "Buy" + " " + (("$"+ element.price )|| "$2000")
-  if(!element.inStock){
-    CARD_BTN.textContent = "Out Of Stock"
-    CARD_BTN.classList.remove('btn-primary')
-    CARD_BTN.classList.add('btn', 'muted', 'btn-warning')
-    
+  if(!element.inStock || element.price == null){
+    CARD_BTN.textContent = "Out of Stock"
+    CARD_BTN.classList.replace('btn-primary', 'btn-warning')
   }
   CARD_BODY.append(CARD_BTN)
   
-  return CARD
+  return CARD_COL
+}
+const SEARCH =()=>{
+  
+  let searchInput = document.getElementById('searchInput')
+  let searchValue = searchInput.value.toLowerCase()
+  let searchParent = document.getElementById('searchParent')
+  searchParent.replaceChildren()
+  //console.log()
+  
+  PRODUCTS.forEach((product)=>{
+    let searchArr = searchValue.split(' ')
+    let nameArr = product.name.toLowerCase().split(' ')
+    let descArr = product.description.toLowerCase().split(' ')
+    //let tags = product.tags
+    
+    let isExistName = searchArr.some((element)=>nameArr.includes(element))
+    let isExistDesc = searchArr.some((element)=>descArr.includes(element))
+    //let isExistTags = searchArr.some((element)=>tags.includes(element))
+    
+    if(isExistName || isExistDesc /*|| isExistTags*/){
+      console.log(product._id, product.name, 'hello world')
+      CREATE_CARD(product, searchParent)
+    }
+    else{
+      console.log(product._id ,product.name,  'match does not exist')
+    }
+  })
 }
 
-//THE INITIAL CRATION OF ALL THE CARDS
+
 
 PRODUCTS.forEach((product)=>{
-  CREATE_CARD(product, MAIN_PARENT)
+  let MAIN_PARENT = document.getElementById('mainParent')
+  CREATE_CARD(product, mainParent)
 })
 
-//CREATION OF CARDS TO BE ADDED TO searchParent SECTION
-//THE SEARCH FUNCTION
-//import {SEARCH} from './database.js'
-const SEARCH =()=>{
-  searchParent.replaceChildren();
-  
-  let searchHeading = document.createElement('h2');
-  searchHeading.classList.add('search-heading', 'display-4')
-  searchParent.append(searchHeading)
-  
-  searchHeading.textContent = 'No Results'
-  
-  PRODUCTS.forEach((element)=>{
-  
-   let searchInput = document.getElementById('searchInput')
-   let searchValue = searchInput.value.toLowerCase()
-   //console.log(searchValue)
-   
-   let productName = element.name.toLowerCase()
-  
-   let searchArr = searchValue.split(' ')
-   let nameArr = productName.split(' ')
-   //console.log(searchArr, nameArr)
-  
-  let isExist = searchArr.some((element)=>nameArr.includes(element))
-  
-   if(searchInput.value !== null && isExist){
-      console.log(element, isExist)
-      searchHeading.textContent = "Search Results"
-      CREATE_CARD(element, searchParent)
-      }
-      
-  else{
-    console.log(element.name+" does not exist")
-    }
-})
-}
+let btnSearch = document.getElementById('btnSearch')
+let searchInput = document.getElementById('searchInput')
+let MAIN_PARENT = document.getElementById('mainParent')
+let btnCancel = document.getElementById('btnCancel')
+
 
 btnSearch.addEventListener('click', ()=>{
+  MAIN_PARENT.style.display = 'none'
+  searchParent.style.display = 'flex'
   SEARCH()
 })
-
-MAIN_PARENT.style.display="block"
-
-let searchInput = document.getElementById('searchInput')
-btnSearch.addEventListener('click', ()=>{
-  searchParent.style.display ="block"
-  MAIN_PARENT.style.display = "none"
+searchInput.addEventListener('input', ()=>{
+  MAIN_PARENT.style.display = 'none'
+  searchParent.style.display = 'flex'
 })
-searchInput.addEventListener('focus', ()=>{
-  searchParent.style.display ="block"
-  MAIN_PARENT.style.display = "none"
-})
-
-const cancel=()=>{
-  searchParent.style.display ="none"
-  MAIN_PARENT.style.display = "block"
-  searchInput.value =''
-}
 btnCancel.addEventListener('click', ()=>{
-  cancel()
+  MAIN_PARENT.style.display = 'flex'
+  searchParent.style.display = 'none'
 })
+
+
